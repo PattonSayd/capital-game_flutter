@@ -1,3 +1,18 @@
+import 'package:flutter/cupertino.dart';
+
+class GameItem {
+  final Country original;
+  final Country? fake;
+
+  const GameItem(this.original, {this.fake});
+
+  String get country => fake?.name ?? original.name;
+
+  String? get capital => fake?.capital ?? original.capital;
+
+  ImageProvider get image => original.image;
+}
+
 class Country {
   final String name;
   final String? capital;
@@ -10,15 +25,6 @@ class Country {
     this.imageUrls = const [''],
     this.index = 0,
   });
-}
 
-class GameItem {
-  final Country original;
-  final Country? fake;
-
-  const GameItem(this.original, {this.fake});
-
-  String get country => fake?.name ?? original.name;
-
-  String? get capital => fake?.capital ?? original.capital;
+  ImageProvider get image => NetworkImage('${imageUrls[index]}?w=600');
 }

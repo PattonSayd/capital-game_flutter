@@ -1,3 +1,4 @@
+import 'package:capitals_quiz/models.dart';
 import 'package:flutter/material.dart';
 
 class Headers extends StatelessWidget {
@@ -59,6 +60,37 @@ class Controls extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class CapitalCard extends StatelessWidget {
+  final GameItem item;
+  const CapitalCard({super.key, required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    return Image(
+      frameBuilder: (context, widget, _, __) {
+        return Stack(
+          children: [
+            Positioned.fill(
+              child: Card(
+                elevation: 8.0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
+                  child: widget,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+      image: item.image,
+      fit: BoxFit.cover,
     );
   }
 }
