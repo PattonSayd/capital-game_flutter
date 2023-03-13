@@ -4,7 +4,7 @@ class GameItem {
   final Country original;
   final Country? fake;
 
-  const GameItem(this.original, {this.fake});
+  const GameItem({required this.original, this.fake});
 
   String get country => fake?.name ?? original.name;
 

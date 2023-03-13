@@ -1,5 +1,6 @@
-import 'package:capitals_quiz/models.dart';
 import 'package:flutter/material.dart';
+
+import 'package:capitals_quiz/models.dart';
 
 class Headers extends StatelessWidget {
   final String? title;
@@ -66,12 +67,15 @@ class Controls extends StatelessWidget {
 
 class CapitalCard extends StatelessWidget {
   final GameItem item;
-  const CapitalCard({super.key, required this.item});
+  const CapitalCard({
+    Key? key,
+    required this.item,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Image(
-      frameBuilder: (context, widget, _, __) {
+      frameBuilder: (_, child, __, ___) {
         return Stack(
           children: [
             Positioned.fill(
@@ -82,7 +86,7 @@ class CapitalCard extends StatelessWidget {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(24),
-                  child: widget,
+                  child: child,
                 ),
               ),
             ),
