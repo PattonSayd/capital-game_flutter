@@ -47,14 +47,14 @@ class Controls extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         InkResponse(
-          onTap: () => onAnswer!.call(true),
+          onTap: () => onAnswer!.call(false),
           child: Text(
             'False',
             style: Theme.of(context).textTheme.headline5,
           ),
         ),
         InkResponse(
-          onTap: () => onAnswer?.call(false),
+          onTap: () => onAnswer?.call(true),
           child: Text(
             'True',
             style: Theme.of(context).textTheme.headline5,

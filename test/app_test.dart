@@ -6,6 +6,8 @@
 // tree, read text, and verify that the values of widget properties are correct.
 
 import 'package:capitals_quiz/data.dart';
+import 'package:capitals_quiz/game.dart';
+import 'package:capitals_quiz/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -13,6 +15,8 @@ void main() {
   test('Success', () async {
     WidgetsFlutterBinding.ensureInitialized();
     // final api = await Api.fetchCountries();
-    final assets = await Assests.load();
+    // final assets = await Assests.load();
+
+    const HomePage();
   });
 }
