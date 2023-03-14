@@ -217,3 +217,41 @@ class FadeSizedText extends StatelessWidget {
     );
   }
 }
+
+class CompletedWidget extends StatelessWidget {
+  final int score;
+  final int topScore;
+  final VoidCallback? onTap;
+
+  const CompletedWidget({
+    Key? key,
+    required this.score,
+    required this.topScore,
+    this.onTap,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => onTap?.call(),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Your Result',
+            style: Theme.of(context).textTheme.headline4,
+          ),
+          Text(
+            score.toString(),
+            style: Theme.of(context).textTheme.headline1,
+          ),
+          Text(
+            'out of $topScore',
+            style: Theme.of(context).textTheme.headline5,
+          ),
+        ],
+      ),
+    );
+  }
+}

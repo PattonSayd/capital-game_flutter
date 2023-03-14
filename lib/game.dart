@@ -23,7 +23,7 @@ mixin GameMixin<T extends StatefulWidget> on State<T> {
   PaletteGenerator? currentPalette;
   PaletteGenerator? nextPalette;
 
-  bool get isComplered => current == gameItems.length;
+  bool get isCompleted => current == gameItems.length;
 
   Future<void> onInit() async {
     await Assets.loadPictures();
