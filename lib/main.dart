@@ -83,44 +83,57 @@ class _HomePageState extends State<HomePage> with GameMixin<HomePage> {
                           valueColor: AlwaysStoppedAnimation(secondColor)),
                     ),
               if (!isCompleted)
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12)
-                          .copyWith(top: 12),
-                      child: Headers(
-                        title: 'Is it ${gameItems[current].capital}?',
-                        subtitle: gameItems[current].country,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: TCard(
-                        slideSpeed: 25,
-                        delaySlideFor: 60,
-                        controller: _cardController,
-                        cards: gameItems
-                            .map((e) => CapitalCard(key: ValueKey(e), item: e))
-                            .toList(),
-                        onForward: (index, info) => onGuess(
-                          index,
-                          info.direction == SwipDirection.Right,
-                          gameItems[current].fake != null,
+                CenterLanscape(
+                  child: LayoutBuilder(builder: (
+                    BuildContext context,
+                    BoxConstraints constraints,
+                  ) {
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12)
+                              .copyWith(top: 12),
+                          child: Headers(
+                            title: 'Is it ${gameItems[current].capital}?',
+                            subtitle: gameItems[current].country,
+                          ),
                         ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Controls(
-                        onAnswer: (isTrue) => _cardController.forward(
-                          direction:
-                              isTrue ? SwipDirection.Right : SwipDirection.Left,
+                        Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: TCard(
+                            slideSpeed: 25,
+                            delaySlideFor: 60,
+                            controller: _cardController,
+                            size: Size.square(min(
+                              constraints.biggest.width,
+                              constraints.biggest.height / 2,
+                            )),
+                            cards: gameItems
+                                .map((e) =>
+                                    CapitalCard(key: ValueKey(e), item: e))
+                                .toList(),
+                            onForward: (index, info) => onGuess(
+                              index,
+                              info.direction == SwipDirection.Right,
+                              gameItems[current].fake != null,
+                            ),
+                          ),
                         ),
-                      ),
-                    )
-                  ],
+                        Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Controls(
+                            onAnswer: (isTrue) => _cardController.forward(
+                              direction: isTrue
+                                  ? SwipDirection.Right
+                                  : SwipDirection.Left,
+                            ),
+                          ),
+                        )
+                      ],
+                    );
+                  }),
                 ),
             ],
           ),

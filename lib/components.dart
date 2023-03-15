@@ -255,3 +255,29 @@ class CompletedWidget extends StatelessWidget {
     );
   }
 }
+
+class CenterLanscape extends StatelessWidget {
+  final Widget? child;
+  const CenterLanscape({
+    Key? key,
+    this.child,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final child = this.child;
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+    return Row(
+      children: [
+        if (isLandscape) const Spacer(flex: 1),
+        if (child != null)
+          Flexible(
+            flex: 2,
+            child: child,
+          ),
+        if (isLandscape) const Spacer(flex: 1),
+      ],
+    );
+  }
+}
