@@ -5,17 +5,33 @@ import 'package:capitals_quiz/game.dart';
 import 'package:flutter/material.dart';
 import 'package:tcard/tcard.dart';
 
-void main() {
-  runApp(const App());
-}
+const _appName = '$countryLimit Capitals';
 
-class App extends StatelessWidget {
+void main() => runApp(const App());
+
+class App extends StatefulWidget {
   const App({super.key});
 
   @override
-  Widget build(BuildContext context) => const MaterialApp(
+  State<App> createState() => _AppState();
+}
+
+class _AppState extends State<App> {
+  bool _dark = false;
+
+  @override
+  Widget build(BuildContext context) => MaterialApp(
+        title: _appName,
         debugShowCheckedModeBanner: false,
-        home: HomePage(),
+        builder: (context, child) => ThemeSwitcher(
+          isDark: _dark,
+          child: child,
+          onToggle: () => setState(() => _dark = !_dark),
+        ),
+        theme: ThemeData(
+          brightness: _dark ? Brightness.dark : Brightness.light,
+        ),
+        home: const HomePage(),
       );
 }
 
