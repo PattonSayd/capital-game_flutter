@@ -153,7 +153,7 @@ class Wave extends StatelessWidget {
         ],
         durations: [duration.inMilliseconds],
         heightPercentages: [0.0],
-        blur: const MaskFilter.blur(BlurStyle.solid, 10),
+        blur: const MaskFilter.blur(BlurStyle.solid, 5),
         gradientBegin: Alignment.bottomCenter,
         gradientEnd: Alignment.topCenter,
       ),

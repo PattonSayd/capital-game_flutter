@@ -5,7 +5,7 @@ import 'package:capitals_quiz/game.dart';
 import 'package:flutter/material.dart';
 import 'package:tcard/tcard.dart';
 
-const _appName = '$countryLimit Capitals';
+const _appName = 'Quiz on  $countryLimit Capitals';
 
 void main() => runApp(const App());
 
@@ -54,27 +54,23 @@ class _HomePageState extends State<HomePage> with GameMixin<HomePage> {
   @override
   Widget build(BuildContext context) {
     if (gameItems.isEmpty) {
-      return const SizedBox.shrink();
+      return const Center(
+        child: Text('An error occurred, please try again'),
+      );
     }
-
-    var mainColor = currentPalette?.mutedColor?.color;
-    var secondColor = currentPalette?.vibrantColor?.color;
-    final defaultColor =
-        mainColor ?? secondColor ?? Theme.of(context).backgroundColor;
-    mainColor = mainColor ?? defaultColor;
-    secondColor = secondColor ?? defaultColor;
 
     return Scaffold(
       body: GradiientBackground(
-        startColor: mainColor.withOpacity(0.3),
-        endColor: secondColor.withOpacity(0.3),
+        startColor: colors.main.withOpacity(0.3),
+        endColor: colors.second.withOpacity(0.3),
         child: SafeArea(
+          bottom: false,
           child: Stack(
             children: [
               Align(
                 alignment: Alignment.bottomCenter,
                 child: ProgressWave(
-                  color: secondColor.withOpacity(0.6),
+                  color: colors.second.withOpacity(0.6),
                   progress: current / gameItems.length,
                   duration: const Duration(seconds: 15),
                 ),
@@ -82,7 +78,7 @@ class _HomePageState extends State<HomePage> with GameMixin<HomePage> {
               Align(
                 alignment: Alignment.bottomCenter,
                 child: ProgressWave(
-                  color: mainColor.withOpacity(0.4),
+                  color: colors.main.withOpacity(0.4),
                   progress: max(0, score.toDouble()) / topScore,
                 ),
               ),
@@ -96,7 +92,7 @@ class _HomePageState extends State<HomePage> with GameMixin<HomePage> {
                     )
                   : Center(
                       child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation(secondColor)),
+                          valueColor: AlwaysStoppedAnimation(colors.second)),
                     ),
               if (!isCompleted)
                 CenterLanscape(

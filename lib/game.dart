@@ -2,8 +2,15 @@ import 'dart:math';
 
 import 'package:capitals_quiz/data.dart';
 import 'package:capitals_quiz/models.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:palette_generator/palette_generator.dart';
+
+class _Colors {
+  final Color main;
+  final Color second;
+
+  const _Colors(this.main, this.second);
+}
 
 const _successGuess = 3;
 const _successFake = 1;
@@ -18,7 +25,10 @@ mixin GameMixin<T extends StatefulWidget> on State<T> {
   var score = 0;
   var current = 0;
 
+  List<Country>? _allCountries;
   final gameItems = <GameItem>[];
+
+  var colors = const _Colors(Colors.grey, Colors.grey);
 
   PaletteGenerator? currentPalette;
   PaletteGenerator? nextPalette;
@@ -29,24 +39,39 @@ mixin GameMixin<T extends StatefulWidget> on State<T> {
     await Assets.loadPictures();
     await _onSetupGame();
     await _onUpdatePalette();
-    setState(() {});
   }
 
   Future<void> _onUpdatePalette() async {
-    currentPalette = currentPalette == null
+    final crt = currentPalette == null
         ? await PaletteGenerator.fromImageProvider(gameItems[current].image)
         : nextPalette;
-    nextPalette = (current + 1) < gameItems.length
+    final next = (current + 1) < gameItems.length
         ? await PaletteGenerator.fromImageProvider(gameItems[current + 1].image)
         : null;
+
+    setState(() {
+      currentPalette = crt;
+      nextPalette = next;
+      colors = _buildColors(crt);
+    });
+  }
+
+  _Colors _buildColors(PaletteGenerator? palette) {
+    var mainColor = currentPalette?.mutedColor?.color;
+    var secondColor = currentPalette?.vibrantColor?.color;
+    final defaultColor =
+        mainColor ?? secondColor ?? Theme.of(context).backgroundColor;
+    mainColor = mainColor ?? defaultColor;
+    secondColor = secondColor ?? defaultColor;
+    return _Colors(mainColor, secondColor);
   }
 
   Future<void> _onSetupGame() async {
     try {
-      var countries = await Api.fetchCountries();
-      countries = _mergeCountryWithImages(countries);
+      var countries = _allCountries ??= await Api.fetchCountries();
       countries.shuffle(_random);
       countries = countries.sublist(0, countryLimit);
+      countries = _mergeCountryWithImages(countries);
       _updateItems(countries);
     } catch (e) {
       debugPrint(e.toString());
@@ -72,7 +97,7 @@ mixin GameMixin<T extends StatefulWidget> on State<T> {
 
   void _updateItems(List<Country> countries) {
     final originals = countries.sublist(0, countries.length ~/ 2);
-    _updateTopScore(topScore + originals.length + _successGuess);
+    _updateTopScore(topScore + originals.length * _successGuess);
     final fakes = countries.sublist(countries.length ~/ 2, countries.length);
     _updateTopScore(topScore + fakes.length * _successFake);
     fakes.shuffle(_random);
@@ -87,6 +112,7 @@ mixin GameMixin<T extends StatefulWidget> on State<T> {
     list.shuffle(_random);
     gameItems.clear();
     gameItems.addAll(list);
+    setState(() {});
   }
 
   void _updateTopScore(int topScore) => this.topScore = topScore;
@@ -112,19 +138,16 @@ mixin GameMixin<T extends StatefulWidget> on State<T> {
 
     _updateScore(score + scoreUpdate);
     _updateCurrent(index);
+
     await _onUpdatePalette();
 
-    print('Score: $score/$topScore. Card: $current/${gameItems.length}');
-
-    setState(() {});
+    debugPrint('Score: $score/$topScore. Card: $current/${gameItems.length}');
   }
 
-  void reset() {
+  Future<void> reset() async {
     _updateCurrent(0);
     _updateScore(0);
     _updateTopScore(0);
-    final countries = gameItems.map((e) => e.original).toList();
-    _updateItems(countries);
-    setState(() {});
+    await _onSetupGame();
   }
 }
