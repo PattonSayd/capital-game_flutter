@@ -52,16 +52,14 @@ class GameLogic extends ChangeNotifier {
     _updateTopScore(topScore + fakes * _successFake);
   }
 
-  void _onUpdatePalette() {
-    if (_itemsLogic.currentIndex > _itemsLogic.gameItems.length - 1) return;
-    _palette.updatePalette(_itemsLogic.current.image, _itemsLogic.next?.image);
-  }
+  void _onUpdatePalette() => _palette.updatePalette(
+      _itemsLogic.current.image, _itemsLogic.next?.image);
 
   void _updateTopScore(int topScore) => this.topScore = topScore;
 
   void _updateScore(int score) => _setState(() => this.score = score);
 
-  void onGuess(int index, bool isTrue) async {
+  void onGuess(int index, bool isTrue) {
     final isActuallyTrue = _itemsLogic.isCurrentTrue;
     int scoreUpdate = 0;
 
@@ -80,7 +78,9 @@ class GameLogic extends ChangeNotifier {
     _updateScore(score + scoreUpdate);
     _itemsLogic.updateCurrent(index);
 
-    _onUpdatePalette();
+    if (!_itemsLogic.isCompleted) {
+      _onUpdatePalette();
+    }
 
     debugPrint(
         'Score: $score/$topScore. Card: ${_itemsLogic.currentIndex}/${_itemsLogic.gameItems.length}');
