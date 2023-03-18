@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:capitals_quiz/domain/game_items.dart';
+import 'package:capitals_quiz/domain/palette.dart';
 import 'package:flutter/material.dart';
 import 'package:tcard/tcard.dart';
 
@@ -16,33 +18,40 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final GameLogic game = GameLogic(Random(), const Api());
   final TCardController _cardController = TCardController();
+  final random = Random();
+  final assets = Assets();
+  final palette = PaletteLogic();
+  late final GameItemsLogic itemsLogic = GameItemsLogic(random);
+  late final GameLogic game =
+      GameLogic(random, const Api(), assets, palette, itemsLogic);
 
   @override
   void initState() {
     super.initState();
     game.addListener(_update);
+    palette.addListener(_update);
     onInit();
   }
 
   Future<void> onInit() async {
-    await Assets.loadPictures();
+    await assets.loadPictures();
     await game.onStartGame();
   }
 
   @override
   void dispose() {
     game.removeListener(_update);
+    palette.removeListener(_update);
     super.dispose();
   }
 
   void _update() => setState(() {});
 
-  List<GameItem> get gameItems => game.gameItems;
-  int get current => game.current;
-  bool get isCompleted => game.isCompleted;
-  ColorPair get colors => game.colors;
+  List<GameItems> get gameItems => itemsLogic.gameItems;
+  int get currentIndex => itemsLogic.currentIndex;
+  bool get isCompleted => itemsLogic.isCompleted;
+  ColorPair get colors => palette.colors;
   int get score => game.score;
   int get topScore => game.topScore;
 
@@ -53,7 +62,10 @@ class _HomePageState extends State<HomePage> {
         startColor: colors.main.withOpacity(0.3),
         endColor: colors.second.withOpacity(0.3),
         child: gameItems.isEmpty
-            ? const SizedBox.shrink()
+            ? Center(
+                child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation(colors.second)),
+              )
             : SafeArea(
                 child: Stack(
                   children: [
@@ -61,7 +73,7 @@ class _HomePageState extends State<HomePage> {
                       alignment: Alignment.bottomCenter,
                       child: ProgressWave(
                         color: colors.second.withOpacity(0.6),
-                        progress: current / gameItems.length,
+                        progress: itemsLogic.progress,
                         duration: const Duration(seconds: 15),
                       ),
                     ),
@@ -100,8 +112,9 @@ class _HomePageState extends State<HomePage> {
                                     const EdgeInsets.symmetric(horizontal: 12)
                                         .copyWith(top: 12),
                                 child: Headers(
-                                  title: 'Is it ${gameItems[current].capital}?',
-                                  subtitle: gameItems[current].country,
+                                  title:
+                                      'Is it ${gameItems[currentIndex].capital}?',
+                                  subtitle: gameItems[currentIndex].country,
                                 ),
                               ),
                               Padding(
@@ -118,10 +131,12 @@ class _HomePageState extends State<HomePage> {
                                       .map((e) => CapitalCard(
                                           key: ValueKey(e), item: e))
                                       .toList(),
-                                  onForward: (index, info) => game.onGuess(
-                                    index,
-                                    info.direction == SwipDirection.Right,
-                                  ),
+                                  onForward: (index, info) {
+                                    game.onGuess(
+                                      index,
+                                      info.direction == SwipDirection.Right,
+                                    );
+                                  },
                                 ),
                               ),
                               Padding(

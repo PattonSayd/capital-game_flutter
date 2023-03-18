@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
 
-class GameItem {
+class GameItems {
   final Country original;
   final Country? fake;
 
-  const GameItem({required this.original, this.fake});
+  const GameItems({required this.original, this.fake});
 
   String get country => fake?.name ?? original.name;
 

@@ -68,7 +68,7 @@ class Controls extends StatelessWidget {
 }
 
 class CapitalCard extends StatelessWidget {
-  final GameItem item;
+  final GameItems item;
   const CapitalCard({
     Key? key,
     required this.item,
