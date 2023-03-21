@@ -16,7 +16,7 @@ class GameItems {
 
 class Country {
   final String name;
-  final String? capital;
+  final String capital;
   final List<String> imageUrls;
   final int index;
 

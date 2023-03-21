@@ -20,7 +20,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final TCardController _cardController = TCardController();
+  final _cardController = TCardController();
 
   @override
   void initState() {
