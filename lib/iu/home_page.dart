@@ -17,9 +17,9 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final TCardController _cardController = TCardController();
-  final palette = Assemble.palette;
-  final gameItemsLogic = Assemble.gameItemsLogic;
-  final game = Assemble.game;
+  final palette = assemble.palette;
+  final gameItemsLogic = assemble.gameItemsLogic;
+  final game = assemble.game;
 
   @override
   void initState() {
@@ -28,7 +28,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> onInit() async {
-    await Assemble.assets.loadPictures();
+    await assemble.assets.loadPictures();
     await game.onStartGame();
   }
 
@@ -42,19 +42,16 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    print('object');
     return Scaffold(
       body: StreamBuilder<ColorPair>(
           initialData: palette.colors,
           stream: palette.stream,
           builder: (context, snapshot) {
-            print('ColorPair');
             final colors = snapshot.requireData;
             return StreamBuilder<GameItemsState>(
                 stream: gameItemsLogic.stream,
                 builder: (context, snapshot) {
                   final isCompleted = gameItemsLogic.state.isCompleted;
-                  print('isCompleted = $isCompleted');
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const SizedBox.shrink();
                   }
@@ -136,12 +133,10 @@ class _CardsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<GameItemsState>(
-        initialData: Assemble.gameItemsLogic.state,
-        stream: Assemble.gameItemsLogic.stream,
+        initialData: assemble.gameItemsLogic.state,
+        stream: assemble.gameItemsLogic.stream,
         builder: (context, snapshot) {
           final state = snapshot.requireData;
-          print('TCard');
-
           return TCard(
             slideSpeed: 25,
             delaySlideFor: 60,
@@ -154,7 +149,7 @@ class _CardsWidget extends StatelessWidget {
                 .map((e) => CapitalCard(key: ValueKey(e), item: e))
                 .toList(),
             onForward: (index, info) {
-              Assemble.game.onGuess(
+              assemble.game.onGuess(
                 index,
                 info.direction == SwipDirection.Right,
               );
@@ -172,12 +167,10 @@ class _HeaderWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<GameItemsState>(
-        initialData: Assemble.gameItemsLogic.state,
-        stream: Assemble.gameItemsLogic.stream,
+        initialData: assemble.gameItemsLogic.state,
+        stream: assemble.gameItemsLogic.stream,
         builder: (context, snapshot) {
           final state = snapshot.requireData;
-          print('Header');
-
           return Headers(
             title: 'Is it ${state.current.capital}?',
             subtitle: state.current.country,
@@ -194,23 +187,19 @@ class _ProgressWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<double>(
-        initialData: Assemble.gameItemsLogic.state.progress,
-        stream: Assemble.gameItemsLogic.stream
+        initialData: assemble.gameItemsLogic.state.progress,
+        stream: assemble.gameItemsLogic.stream
             .map((state) => state.progress)
             .distinct(),
         builder: (context, snapshot) {
           final progress = snapshot.requireData;
-          print('Progress1 = $progress');
-
           return StreamBuilder<Color>(
-              initialData: Assemble.palette.colors.second,
-              stream: Assemble.palette.stream
+              initialData: assemble.palette.colors.second,
+              stream: assemble.palette.stream
                   .map((state) => state.second)
                   .distinct(),
               builder: (context, snapshot) {
                 final color = snapshot.requireData;
-                print('Color = $color');
-
                 return ProgressWave(
                     color: color.withOpacity(0.6),
                     progress: progress,
@@ -226,19 +215,15 @@ class _ScoreProgressWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<double>(
-      initialData: Assemble.game.state.progress,
-      stream: Assemble.game.stream.map((state) => state.progress).distinct(),
+      initialData: assemble.game.state.progress,
+      stream: assemble.game.stream.map((state) => state.progress).distinct(),
       builder: (context, snapshot) {
         final progress = snapshot.requireData;
-        print('Progress2 = $progress');
-
         return StreamBuilder<ColorPair>(
-          initialData: Assemble.palette.colors,
-          stream: Assemble.palette.stream,
+          initialData: assemble.palette.colors,
+          stream: assemble.palette.stream,
           builder: (context, snapshot) {
             final colors = snapshot.requireData;
-            print('ColorPair = $colors');
-
             return ProgressWave(
               color: colors.second.withOpacity(0.4),
               progress: progress,
@@ -257,22 +242,21 @@ class _ResultOrLoadingWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<GameItemsState>(
-      initialData: Assemble.gameItemsLogic.state,
-      stream: Assemble.gameItemsLogic.stream,
+      initialData: assemble.gameItemsLogic.state,
+      stream: assemble.gameItemsLogic.stream,
       builder: (context, snapshot) {
         final isCompleted = snapshot.requireData.isCompleted;
-        print('isComplete2 = $isCompleted');
         return isCompleted
             ? Positioned.fill(
                 child: CompletedWidget(
-                  score: Assemble.game.state.score,
-                  topScore: Assemble.game.state.topScore,
-                  onTap: () => Assemble.game.onReset(),
+                  score: assemble.game.state.score,
+                  topScore: assemble.game.state.topScore,
+                  onTap: () => assemble.game.onReset(),
                 ),
               )
             : StreamBuilder<ColorPair>(
-                initialData: Assemble.palette.colors,
-                stream: Assemble.palette.stream,
+                initialData: assemble.palette.colors,
+                stream: assemble.palette.stream,
                 builder: (context, snapshot) {
                   final colors = snapshot.requireData;
 
