@@ -1,4 +1,3 @@
-import 'package:capitals_quiz/domain/assemble.dart';
 import 'package:flutter/cupertino.dart';
 
 class GameItems {
