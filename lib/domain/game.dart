@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:capitals_quiz/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -96,7 +97,8 @@ class GameLogic extends Bloc<GameEvent, GameState> {
       resultState = resultState.copyWith(countries: [...countries]);
       final limitedCountries = _getCountriesForNewGame(countries);
       resultState = _prepareItems(resultState, limitedCountries);
-    } catch (e) {
+    } catch (e, s) {
+      logger.severe(e, s);
       debugPrint(e.toString());
     }
     await _updatePalette();
@@ -189,5 +191,15 @@ class GameLogic extends Bloc<GameEvent, GameState> {
     );
 
     emit(newState);
+  }
+
+  @override
+  void onTransition(Transition<GameEvent, GameState> transition) {
+    super.onTransition(transition);
+    logger.fine(
+      'Bloc: ${transition.event.runtimeType}:'
+      ' ${transition.currentState.score}/${transition.currentState.topScore} '
+      '-> ${transition.nextState.score}/${transition.currentState.topScore}',
+    );
   }
 }
