@@ -96,12 +96,13 @@ class GameLogic extends Bloc<GameEvent, GameState> {
       countries = _mergeCountryWithImages(countries);
       resultState = resultState.copyWith(countries: [...countries]);
       final limitedCountries = _getCountriesForNewGame(countries);
+      _gameItemsLogic.updateGameItems(limitedCountries);
       resultState = _prepareItems(resultState, limitedCountries);
     } catch (e, s) {
       logger.severe(e, s);
       debugPrint(e.toString());
     }
-    await _updatePalette();
+    await _updatePalette(_gameItemsLogic.state);
     emit(resultState);
   }
 
@@ -119,8 +120,8 @@ class GameLogic extends Bloc<GameEvent, GameState> {
     return _updateTopScore(state, topScore);
   }
 
-  Future<void> _updatePalette() async => _palette.updatePalette(
-      _gameItemsLogic.state.current.image, _gameItemsLogic.state.next?.image);
+  Future<void> _updatePalette(GameItemsState state) async =>
+      _palette.updatePalette(state.current.image, state.next?.image);
 
   GameState _updateTopScore(GameState state, int topScore) =>
       state.copyWith(topScore: topScore);
@@ -152,8 +153,9 @@ class GameLogic extends Bloc<GameEvent, GameState> {
     final resultState = _updateScore(state, state.score + scoreUpdate);
     _gameItemsLogic.updateCurrent(index);
 
-    if (!_gameItemsLogic.state.isCompleted) {
-      await _updatePalette();
+    final gameItemsState = _gameItemsLogic.state;
+    if (!gameItemsState.isCompleted) {
+      await _updatePalette(gameItemsState);
     }
 
     debugPrint(
@@ -185,6 +187,7 @@ class GameLogic extends Bloc<GameEvent, GameState> {
   ) {
     _gameItemsLogic.reset();
     final limitedCountries = _getCountriesForNewGame(state.countries);
+    _gameItemsLogic.updateGameItems(limitedCountries);
     final newState = _prepareItems(
       state.copyWith(score: 0),
       limitedCountries,

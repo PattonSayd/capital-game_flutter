@@ -21,13 +21,14 @@ class Api {
 }
 
 class Assets {
-  Assets();
+  final JsonLoader _loader;
+
+  Assets(this._loader);
 
   Map<String, List<String>>? _pictures;
 
   Future<void> loadPictures() async {
-    final raw = await rootBundle.loadString('assets/pictures.json');
-    final assets = jsonDecode(raw) as Map<String, dynamic>;
+    final assets = await _loader.load();
     _pictures = <String, List<String>>{
       for (final asset in assets.entries)
         asset.key: List<String>.from(asset.value),
@@ -36,4 +37,18 @@ class Assets {
 
   List<String> getPictures(String? capital) =>
       _pictures?[capital] ?? <String>[];
+}
+
+abstract class JsonLoader {
+  Future<Map<String, dynamic>> load();
+}
+
+class AssetsJsonLoader implements JsonLoader {
+  const AssetsJsonLoader();
+
+  @override
+  Future<Map<String, dynamic>> load() async {
+    final raw = await rootBundle.loadString('assets/assets.json');
+    return jsonDecode(raw) as Map<String, dynamic>;
+  }
 }
