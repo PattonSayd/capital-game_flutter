@@ -1,7 +1,7 @@
-import 'dart:async';
 import 'dart:math';
 
 import 'package:capitals_quiz/domain/models.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class GameItemsState {
   final int currentIndex;
@@ -42,22 +42,12 @@ class GameItemsState {
   }
 }
 
-class GameItemsLogic {
+class GameItemsLogic extends Cubit<GameItemsState> {
   final Random _random;
-  GameItemsLogic(this._random);
-
-  var _state = GameItemsState.empty;
-
-  GameItemsState get state => _state;
-
-  final _controller = StreamController<GameItemsState>.broadcast();
-
-  Stream<GameItemsState> get stream => _controller.stream;
-
-  Future<void> dispose() => _controller.close();
+  GameItemsLogic(this._random) : super(GameItemsState.empty);
 
   void updateCurrent(int current) =>
-      _setState(state.copyWith(currentIndex: current));
+      emit(state.copyWith(currentIndex: current));
 
   void updateGameItems(List<Country> countries) {
     final originals = countries.sublist(0, countries.length ~/ 2);
@@ -72,15 +62,10 @@ class GameItemsLogic {
       ));
     }
     list.shuffle(_random);
-    _setState(state.copyWith(gameItems: list));
+    emit(state.copyWith(gameItems: list));
   }
 
   void reset() {
     updateCurrent(0);
-  }
-
-  void _setState(GameItemsState state) {
-    _state = state;
-    _controller.add(_state);
   }
 }

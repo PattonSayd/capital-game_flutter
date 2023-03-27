@@ -8,7 +8,6 @@ import 'package:capitals_quiz/domain/game.dart';
 import 'package:capitals_quiz/domain/game_items_logic.dart';
 
 import '../data/data.dart';
-import '../domain/assemble.dart';
 import '../domain/models.dart';
 import 'components.dart';
 

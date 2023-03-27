@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:capitals_quiz/domain/models.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:palette_generator/palette_generator.dart';
 
 class PaletteState {
@@ -38,23 +39,15 @@ class PaletteState {
       );
 }
 
-class PaletteLogic {
-  var _state = const PaletteState();
+class PaletteLogic extends Cubit<PaletteState> {
+  PaletteLogic() : super(const PaletteState());
 
-  final _controller = StreamController<PaletteState>.broadcast();
-
-  Stream<ColorPair> get stream => _controller.stream.map((state) {
-        return state.colors;
-      });
-
-  ColorPair get colors => _state.colors;
-
-  Future<void> dispose() => _controller.close();
+  ColorPair get colors => state.colors;
 
   Future<void> updatePalette(ImageProvider current, ImageProvider? next) async {
-    final crt = _state.currentPalette == null
+    final crt = state.currentPalette == null
         ? await PaletteGenerator.fromImageProvider(current)
-        : _state.nextPalette;
+        : state.nextPalette;
     final nxt =
         next != null ? await PaletteGenerator.fromImageProvider(next) : null;
 
@@ -62,10 +55,5 @@ class PaletteLogic {
   }
 
   _onUpdatePalette(PaletteGenerator? current, PaletteGenerator? next) =>
-      _setState(_state.copyWith(currentPalette: current, nextPalette: next));
-
-  void _setState(PaletteState state) {
-    _state = state;
-    _controller.add(_state);
-  }
+      emit(state.copyWith(currentPalette: current, nextPalette: next));
 }

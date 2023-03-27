@@ -7,12 +7,15 @@ import 'package:capitals_quiz/data/data.dart';
 import 'package:capitals_quiz/domain/game_items_logic.dart';
 import 'package:capitals_quiz/domain/models.dart';
 import 'package:capitals_quiz/domain/palette.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class GameState {
   final int score;
   final int topScore;
 
   const GameState({required this.score, required this.topScore});
+
+  static const GameState empty = GameState(score: 0, topScore: 1);
 
   double get progress => max(0, score) / topScore;
 
@@ -27,7 +30,7 @@ class GameState {
   }
 }
 
-class GameLogic {
+class GameLogic extends Cubit<GameState> {
   final Random _random;
   final Api _api;
   final Assets _assets;
@@ -40,22 +43,12 @@ class GameLogic {
     this._assets,
     this._palette,
     this._gameItemsLogic,
-  );
+  ) : super(GameState.empty);
 
   static const _successGuess = 3;
   static const _successFake = 1;
   static const _fail = -1;
   static const countryLimit = 20;
-
-  final _controller = StreamController<GameState>.broadcast();
-
-  var _state = const GameState(score: 0, topScore: 1);
-
-  GameState get state => _state;
-
-  Stream<GameState> get stream => _controller.stream;
-
-  Future<void> dispose() => _controller.close();
 
   List<Country>? _allCountries;
 
@@ -84,9 +77,9 @@ class GameLogic {
       _gameItemsLogic.state.current.image, _gameItemsLogic.state.next?.image);
 
   void _updateTopScore(int topScore) =>
-      _setState(state.copyWith(topScore: topScore));
+      emit(state.copyWith(topScore: topScore));
 
-  void _updateScore(int score) => _setState(state.copyWith(score: score));
+  void _updateScore(int score) => emit(state.copyWith(score: score));
 
   void onGuess(int index, bool isTrue) {
     final isActuallyTrue = _gameItemsLogic.state.isCurrentTrue;
@@ -137,10 +130,5 @@ class GameLogic {
     _updateTopScore(1);
     _gameItemsLogic.reset();
     await onStartGame();
-  }
-
-  void _setState(GameState state) {
-    _state = state;
-    _controller.add(_state);
   }
 }
