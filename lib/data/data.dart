@@ -20,9 +20,11 @@ class Api {
 }
 
 class Assets {
-  static Map<String, List<String>>? _pictures;
+  Assets();
 
-  static Future<void> loadPictures() async {
+  Map<String, List<String>>? _pictures;
+
+  Future<void> loadPictures() async {
     final raw = await rootBundle.loadString('assets/pictures.json');
     final assets = jsonDecode(raw) as Map<String, dynamic>;
     _pictures = <String, List<String>>{
@@ -31,6 +33,6 @@ class Assets {
     };
   }
 
-  static List<String> getPictures(String? capital) =>
+  List<String> getPictures(String? capital) =>
       _pictures?[capital] ?? <String>[];
 }
