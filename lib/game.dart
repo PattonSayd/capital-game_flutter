@@ -5,41 +5,37 @@ import 'package:capitals_quiz/models.dart';
 import 'package:flutter/material.dart';
 import 'package:palette_generator/palette_generator.dart';
 
-class _Colors {
+class ColorPair {
   final Color main;
   final Color second;
 
-  const _Colors(this.main, this.second);
+  const ColorPair(this.main, this.second);
 }
 
-const _successGuess = 3;
-const _successFake = 1;
-const _fail = -1;
+class GameLogic extends ChangeNotifier {
+  final Random _random;
+  final Api _api;
 
-const countryLimit = 30;
+  GameLogic(this._random, this._api);
 
-final _random = Random();
+  static const _successGuess = 3;
+  static const _successFake = 1;
+  static const _fail = -1;
+  static const countryLimit = 30;
 
-mixin GameMixin<T extends StatefulWidget> on State<T> {
-  var topScore = 0;
-  var score = 0;
-  var current = 0;
+  int topScore = 0;
+  int score = 0;
+  int current = 0;
 
   List<Country>? _allCountries;
   final gameItems = <GameItem>[];
 
-  var colors = const _Colors(Colors.grey, Colors.grey);
+  var colors = const ColorPair(Colors.grey, Colors.grey);
 
   PaletteGenerator? currentPalette;
   PaletteGenerator? nextPalette;
 
   bool get isCompleted => current == gameItems.length;
-
-  Future<void> onInit() async {
-    await Assets.loadPictures();
-    await _onSetupGame();
-    await _onUpdatePalette();
-  }
 
   Future<void> _onUpdatePalette() async {
     final crt = currentPalette == null
@@ -49,26 +45,24 @@ mixin GameMixin<T extends StatefulWidget> on State<T> {
         ? await PaletteGenerator.fromImageProvider(gameItems[current + 1].image)
         : null;
 
-    setState(() {
-      currentPalette = crt;
-      nextPalette = next;
-      colors = _buildColors(crt);
-    });
+    currentPalette = crt;
+    nextPalette = next;
+    colors = _buildColors(crt);
+    _setState(() {});
   }
 
-  _Colors _buildColors(PaletteGenerator? palette) {
-    var mainColor = currentPalette?.mutedColor?.color;
-    var secondColor = currentPalette?.vibrantColor?.color;
-    final defaultColor =
-        mainColor ?? secondColor ?? Theme.of(context).backgroundColor;
+  ColorPair _buildColors(PaletteGenerator? palette) {
+    Color? mainColor = currentPalette?.mutedColor?.color;
+    Color? secondColor = currentPalette?.vibrantColor?.color;
+    final defaultColor = mainColor ?? secondColor ?? Colors.grey;
     mainColor = mainColor ?? defaultColor;
     secondColor = secondColor ?? defaultColor;
-    return _Colors(mainColor, secondColor);
+    return ColorPair(mainColor, secondColor);
   }
 
-  Future<void> _onSetupGame() async {
+  Future<void> onStartGame() async {
     try {
-      var countries = _allCountries ??= await Api.fetchCountries();
+      var countries = _allCountries ??= await _api.fetchCountries();
       countries.shuffle(_random);
       countries = countries.sublist(0, countryLimit);
       countries = _mergeCountryWithImages(countries);
@@ -76,6 +70,7 @@ mixin GameMixin<T extends StatefulWidget> on State<T> {
     } catch (e) {
       debugPrint(e.toString());
     }
+    await _onUpdatePalette();
   }
 
   List<Country> _mergeCountryWithImages(List<Country> countries) {
@@ -112,7 +107,6 @@ mixin GameMixin<T extends StatefulWidget> on State<T> {
     list.shuffle(_random);
     gameItems.clear();
     gameItems.addAll(list);
-    setState(() {});
   }
 
   void _updateTopScore(int topScore) => this.topScore = topScore;
@@ -121,8 +115,9 @@ mixin GameMixin<T extends StatefulWidget> on State<T> {
 
   void _updateCurrent(int current) => this.current = current;
 
-  void onGuess(int index, bool isTrue, bool isActuallyTrue) async {
-    var scoreUpdate = 0;
+  void onGuess(int index, bool isTrue) async {
+    final isActuallyTrue = gameItems[current].fake != null;
+    int scoreUpdate = 0;
 
     if (isTrue && isActuallyTrue) {
       scoreUpdate = _successGuess;
@@ -144,10 +139,15 @@ mixin GameMixin<T extends StatefulWidget> on State<T> {
     debugPrint('Score: $score/$topScore. Card: $current/${gameItems.length}');
   }
 
-  Future<void> reset() async {
+  Future<void> onReset() async {
     _updateCurrent(0);
     _updateScore(0);
     _updateTopScore(0);
-    await _onSetupGame();
+    await onStartGame();
+  }
+
+  void _setState(VoidCallback callback) {
+    callback();
+    notifyListeners();
   }
 }

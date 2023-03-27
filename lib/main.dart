@@ -2,10 +2,13 @@ import 'dart:math';
 
 import 'package:capitals_quiz/components.dart';
 import 'package:capitals_quiz/game.dart';
+import 'package:capitals_quiz/models.dart';
 import 'package:flutter/material.dart';
 import 'package:tcard/tcard.dart';
 
-const _appName = 'Quiz on  $countryLimit Capitals';
+import 'data.dart';
+
+const _appName = 'Quiz on  ${GameLogic.countryLimit} Capitals';
 
 void main() => runApp(const App());
 
@@ -42,14 +45,36 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with GameMixin<HomePage> {
+class _HomePageState extends State<HomePage> {
+  final GameLogic game = GameLogic(Random(), const Api());
   final TCardController _cardController = TCardController();
 
   @override
   void initState() {
-    onInit();
     super.initState();
+    game.addListener(_update);
+    onInit();
   }
+
+  Future<void> onInit() async {
+    await Assets.loadPictures();
+    await game.onStartGame();
+  }
+
+  @override
+  void dispose() {
+    game.removeListener(_update);
+    super.dispose();
+  }
+
+  void _update() => setState(() {});
+
+  List<GameItem> get gameItems => game.gameItems;
+  int get current => game.current;
+  bool get isCompleted => game.isCompleted;
+  ColorPair get colors => game.colors;
+  int get score => game.score;
+  int get topScore => game.topScore;
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +107,7 @@ class _HomePageState extends State<HomePage> with GameMixin<HomePage> {
                             child: CompletedWidget(
                               score: score,
                               topScore: topScore,
-                              onTap: reset,
+                              onTap: () => game.onReset(),
                             ),
                           )
                         : Center(
@@ -123,10 +148,9 @@ class _HomePageState extends State<HomePage> with GameMixin<HomePage> {
                                       .map((e) => CapitalCard(
                                           key: ValueKey(e), item: e))
                                       .toList(),
-                                  onForward: (index, info) => onGuess(
+                                  onForward: (index, info) => game.onGuess(
                                     index,
                                     info.direction == SwipDirection.Right,
-                                    gameItems[current].fake != null,
                                   ),
                                 ),
                               ),

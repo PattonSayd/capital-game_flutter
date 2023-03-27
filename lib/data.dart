@@ -6,7 +6,9 @@ import 'package:http/http.dart' as http;
 import 'models.dart';
 
 class Api {
-  static Future<List<Country>> fetchCountries() async {
+  const Api();
+
+  Future<List<Country>> fetchCountries() async {
     final response =
         await http.get(Uri.parse('https://restcountries.com/v2/all'));
     final body = jsonDecode(response.body);
