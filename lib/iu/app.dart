@@ -1,12 +1,13 @@
 import 'package:capitals_quiz/domain/assemble.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 
 import '../domain/game.dart';
 import 'components.dart';
 import 'home_page.dart';
 
-const _appName = 'Quiz on  ${GameLogic.countryLimit} Capitals';
+const _appName = 'Quiz on  ${GameLogic.defaultCountryLimit} Capitals';
 
 class App extends StatefulWidget {
   const App({super.key});
@@ -21,7 +22,7 @@ class _AppState extends State<App> {
   @override
   Widget build(BuildContext context) => MultiProvider(
         providers: [
-          Provider.value(value: assemble.game),
+          BlocProvider.value(value: assemble.game),
           Provider.value(value: assemble.assets),
           StreamProvider.value(
             value: assemble.gameItemsLogic.stream,

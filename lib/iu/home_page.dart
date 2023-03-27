@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:tcard/tcard.dart';
 
@@ -30,7 +31,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> onInit() async {
     await context.read<Assets>().loadPictures();
     if (!mounted) return;
-    await context.read<GameLogic>().onStartGame();
+    context.read<GameLogic>().add(const OnStartGameEvent());
   }
 
   @override
@@ -132,10 +133,10 @@ class _CardsWidget extends StatelessWidget {
                 .map((e) => CapitalCard(key: ValueKey(e), item: e))
                 .toList(),
             onForward: (index, info) {
-              context.read<GameLogic>().onGuess(
-                    index,
-                    info.direction == SwipDirection.Right,
-                  );
+              context.read<GameLogic>().add(OnGuessGameEvent(
+                    index: index,
+                    isTrue: info.direction == SwipDirection.Right,
+                  ));
             },
           );
         });
@@ -205,12 +206,16 @@ class _ResultOrLoadingWidget extends StatelessWidget {
     final isCompleted =
         context.select<GameItemsState, bool>((state) => state.isCompleted);
     if (isCompleted) {
-      final game = context.watch<GameLogic>();
+      final game = context.read<GameLogic>();
       return Positioned.fill(
-        child: CompletedWidget(
-          score: game.state.score,
-          topScore: game.state.topScore,
-          onTap: () => game.onReset(),
+        child: BlocBuilder<GameLogic, GameState>(
+          builder: (context, state) {
+            return CompletedWidget(
+              score: state.score,
+              topScore: state.topScore,
+              onTap: () => game.add(const OnResetGameEvent()),
+            );
+          },
         ),
       );
     } else {

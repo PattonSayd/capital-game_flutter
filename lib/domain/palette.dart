@@ -45,13 +45,13 @@ class PaletteLogic extends Cubit<PaletteState> {
   ColorPair get colors => state.colors;
 
   Future<void> updatePalette(ImageProvider current, ImageProvider? next) async {
-    final crt = state.currentPalette == null
+    final currentGen = state.currentPalette == null
         ? await PaletteGenerator.fromImageProvider(current)
         : state.nextPalette;
-    final nxt =
+    final nextGen =
         next != null ? await PaletteGenerator.fromImageProvider(next) : null;
 
-    _onUpdatePalette(crt, nxt);
+    _onUpdatePalette(currentGen, nextGen);
   }
 
   _onUpdatePalette(PaletteGenerator? current, PaletteGenerator? next) =>
