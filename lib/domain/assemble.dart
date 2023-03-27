@@ -23,8 +23,11 @@ abstract class Assemblemodule {
   @injectable
   Api provideApi() => const Api();
 
+  @injectable
+  JsonLoader provideJsonLoader() => const AssetsJsonLoader();
+
   @lazySingleton
-  Assets provideAssets() => Assets();
+  Assets provideAssets(JsonLoader loader) => Assets(loader);
 
   @lazySingleton
   PaletteLogic providePaletteLogic() => PaletteLogic();

@@ -30,10 +30,12 @@ extension GetItInjectableX on _i1.GetIt {
     );
     final assemblemodule = _$Assemblemodule();
     gh.factory<_i3.Api>(() => assemblemodule.provideApi());
-    gh.lazySingleton<_i3.Assets>(() => assemblemodule.provideAssets());
+    gh.factory<_i3.JsonLoader>(() => assemblemodule.provideJsonLoader());
     gh.lazySingleton<_i4.PaletteLogic>(
         () => assemblemodule.providePaletteLogic());
     gh.factory<_i5.Random>(() => assemblemodule.provideRandom());
+    gh.lazySingleton<_i3.Assets>(
+        () => assemblemodule.provideAssets(gh<_i3.JsonLoader>()));
     gh.lazySingleton<_i6.GameItemsLogic>(
         () => assemblemodule.provideGameItemsLogic(gh<_i5.Random>()));
     gh.lazySingleton<_i7.GameLogic>(() => assemblemodule.provideGameLogic(
