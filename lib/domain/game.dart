@@ -117,7 +117,7 @@ class GameLogic {
 
   List<Country> _mergeCountryWithImages(List<Country> countries) {
     return countries.where((e) {
-      return e.capital != null;
+      return e.capital.isNotEmpty;
     }).map((e) {
       final imageUrls = _assets.getPictures(e.capital);
       if (imageUrls.isNotEmpty) {

@@ -13,6 +13,7 @@ class Api {
         await http.get(Uri.parse('https://restcountries.com/v2/all'));
     final body = jsonDecode(response.body);
     final capitals = (body as List<dynamic>)
+        .where((e) => e['name'] != null && e['capital'] != null)
         .map((e) => Country(e['name'], e['capital']))
         .toList();
     return capitals;

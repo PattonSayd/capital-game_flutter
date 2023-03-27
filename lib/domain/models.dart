@@ -1,3 +1,4 @@
+import 'package:capitals_quiz/domain/assemble.dart';
 import 'package:flutter/cupertino.dart';
 
 class GameItems {
@@ -15,7 +16,7 @@ class GameItems {
 
 class Country {
   final String name;
-  final String? capital;
+  final String capital;
   final List<String> imageUrls;
   final int index;
 
