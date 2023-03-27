@@ -1,28 +1,46 @@
 import 'dart:math';
 
+import 'package:capitals_quiz/domain/assemble.config.dart';
 import 'package:capitals_quiz/domain/game.dart';
 import 'package:capitals_quiz/domain/game_items_logic.dart';
 import 'package:capitals_quiz/domain/palette.dart';
 import 'package:get_it/get_it.dart';
+import 'package:injectable/injectable.dart';
 
 import '../data/data.dart';
 
 final getIt = GetIt.I;
 const assemble = Assemble._();
 
-void setup() {
-  getIt.registerFactory(() => Random());
-  getIt.registerFactory(() => const Api());
-  getIt.registerLazySingleton(() => Assets());
-  getIt.registerLazySingleton(() => PaletteLogic());
-  getIt.registerLazySingleton(() => GameItemsLogic(getIt.get<Random>()));
-  getIt.registerLazySingleton(() => GameLogic(
-        getIt.get<Random>(),
-        getIt.get<Api>(),
-        getIt.get<Assets>(),
-        getIt.get<PaletteLogic>(),
-        getIt.get<GameItemsLogic>(),
-      ));
+@injectableInit
+void configureDependencies() => getIt.init();
+
+@module
+abstract class Assemblemodule {
+  @injectable
+  Random provideRandom() => Random();
+
+  @injectable
+  Api provideApi() => const Api();
+
+  @lazySingleton
+  Assets provideAssets() => Assets();
+
+  @lazySingleton
+  PaletteLogic providePaletteLogic() => PaletteLogic();
+
+  @lazySingleton
+  GameItemsLogic provideGameItemsLogic(Random random) => GameItemsLogic(random);
+
+  @lazySingleton
+  GameLogic provideGameLogic(
+    Random random,
+    Api api,
+    Assets assets,
+    PaletteLogic paletteLogic,
+    GameItemsLogic gameItemsLogic,
+  ) =>
+      GameLogic(random, api, assets, paletteLogic, gameItemsLogic);
 }
 
 class Assemble {

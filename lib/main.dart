@@ -4,6 +4,6 @@ import 'package:flutter/material.dart';
 import 'iu/app.dart';
 
 void main() {
-  setup();
+  configureDependencies();
   runApp(const App());
 }
