@@ -28,3 +28,10 @@ class Country {
 
   ImageProvider get image => NetworkImage('${imageUrls[index]}?w=600');
 }
+
+class ColorPair {
+  final Color main;
+  final Color second;
+
+  const ColorPair(this.main, this.second);
+}
