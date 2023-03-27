@@ -1,12 +1,10 @@
 import 'dart:math';
 
-import 'package:capitals_quiz/domain/game_items.dart';
-import 'package:capitals_quiz/domain/palette.dart';
+import 'package:capitals_quiz/domain/game_items_logic.dart';
 import 'package:flutter/material.dart';
 import 'package:tcard/tcard.dart';
 
-import '../data/data.dart';
-import '../domain/game.dart';
+import '../domain/assemble.dart';
 import '../domain/models.dart';
 import 'components.dart';
 
@@ -19,144 +17,271 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final TCardController _cardController = TCardController();
-  final random = Random();
-  final assets = Assets();
-  final palette = PaletteLogic();
-  late final GameItemsLogic itemsLogic = GameItemsLogic(random);
-  late final GameLogic game =
-      GameLogic(random, const Api(), assets, palette, itemsLogic);
+  final palette = Assemble.palette;
+  final gameItemsLogic = Assemble.gameItemsLogic;
+  final game = Assemble.game;
 
   @override
   void initState() {
     super.initState();
-    game.addListener(_update);
-    palette.addListener(_update);
     onInit();
   }
 
   Future<void> onInit() async {
-    await assets.loadPictures();
+    await Assemble.assets.loadPictures();
     await game.onStartGame();
   }
 
   @override
   void dispose() {
-    game.removeListener(_update);
-    palette.removeListener(_update);
+    gameItemsLogic.dispose();
+    game.dispose();
+    palette.dispose();
     super.dispose();
   }
 
-  void _update() => setState(() {});
+  @override
+  Widget build(BuildContext context) {
+    print('object');
+    return Scaffold(
+      body: StreamBuilder<ColorPair>(
+          initialData: palette.colors,
+          stream: palette.stream,
+          builder: (context, snapshot) {
+            print('ColorPair');
+            final colors = snapshot.requireData;
+            return StreamBuilder<GameItemsState>(
+                stream: gameItemsLogic.stream,
+                builder: (context, snapshot) {
+                  final isCompleted = gameItemsLogic.state.isCompleted;
+                  print('isCompleted = $isCompleted');
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const SizedBox.shrink();
+                  }
+                  return GradiientBackground(
+                    startColor: colors.main.withOpacity(0.3),
+                    endColor: colors.second.withOpacity(0.3),
+                    child: SafeArea(
+                      bottom: false,
+                      child: Stack(
+                        children: [
+                          const Align(
+                            alignment: Alignment.bottomCenter,
+                            child: _ProgressWidget(),
+                          ),
+                          const Align(
+                            alignment: Alignment.bottomCenter,
+                            child: _ScoreProgressWidget(),
+                          ),
+                          const _ResultOrLoadingWidget(),
+                          if (!isCompleted)
+                            CenterLanscape(
+                              child: LayoutBuilder(builder: (
+                                BuildContext context,
+                                BoxConstraints constraints,
+                              ) {
+                                return Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                              horizontal: 12)
+                                          .copyWith(top: 12),
+                                      child: const _HeaderWidget(),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.all(12.0),
+                                      child: _CardsWidget(
+                                        cardController: _cardController,
+                                        constraints: constraints,
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.all(12.0),
+                                      child: Controls(
+                                        onAnswer: (isTrue) =>
+                                            _cardController.forward(
+                                          direction: isTrue
+                                              ? SwipDirection.Right
+                                              : SwipDirection.Left,
+                                        ),
+                                      ),
+                                    )
+                                  ],
+                                );
+                              }),
+                            ),
+                        ],
+                      ),
+                    ),
+                  );
+                });
+          }),
+    );
+  }
+}
 
-  List<GameItems> get gameItems => itemsLogic.gameItems;
-  int get currentIndex => itemsLogic.currentIndex;
-  bool get isCompleted => itemsLogic.isCompleted;
-  ColorPair get colors => palette.colors;
-  int get score => game.score;
-  int get topScore => game.topScore;
+class _CardsWidget extends StatelessWidget {
+  const _CardsWidget({
+    Key? key,
+    required this.cardController,
+    required this.constraints,
+  }) : super(key: key);
+
+  final TCardController cardController;
+  final BoxConstraints constraints;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: GradiientBackground(
-        startColor: colors.main.withOpacity(0.3),
-        endColor: colors.second.withOpacity(0.3),
-        child: gameItems.isEmpty
-            ? Center(
-                child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation(colors.second)),
-              )
-            : SafeArea(
-                child: Stack(
-                  children: [
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: ProgressWave(
-                        color: colors.second.withOpacity(0.6),
-                        progress: itemsLogic.progress,
-                        duration: const Duration(seconds: 15),
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: ProgressWave(
-                        color: colors.main.withOpacity(0.4),
-                        progress: max(0, score.toDouble()) / topScore,
-                      ),
-                    ),
-                    isCompleted
-                        ? Positioned.fill(
-                            child: CompletedWidget(
-                              score: score,
-                              topScore: topScore,
-                              onTap: () => game.onReset(),
-                            ),
-                          )
-                        : Center(
-                            child: CircularProgressIndicator(
-                                valueColor:
-                                    AlwaysStoppedAnimation(colors.second)),
-                          ),
-                    if (!isCompleted)
-                      CenterLanscape(
-                        child: LayoutBuilder(builder: (
-                          BuildContext context,
-                          BoxConstraints constraints,
-                        ) {
-                          return Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 12)
-                                        .copyWith(top: 12),
-                                child: Headers(
-                                  title:
-                                      'Is it ${gameItems[currentIndex].capital}?',
-                                  subtitle: gameItems[currentIndex].country,
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(12.0),
-                                child: TCard(
-                                  slideSpeed: 25,
-                                  delaySlideFor: 60,
-                                  controller: _cardController,
-                                  size: Size.square(min(
-                                    constraints.biggest.width,
-                                    constraints.biggest.height / 2,
-                                  )),
-                                  cards: gameItems
-                                      .map((e) => CapitalCard(
-                                          key: ValueKey(e), item: e))
-                                      .toList(),
-                                  onForward: (index, info) {
-                                    game.onGuess(
-                                      index,
-                                      info.direction == SwipDirection.Right,
-                                    );
-                                  },
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(12.0),
-                                child: Controls(
-                                  onAnswer: (isTrue) => _cardController.forward(
-                                    direction: isTrue
-                                        ? SwipDirection.Right
-                                        : SwipDirection.Left,
-                                  ),
-                                ),
-                              )
-                            ],
-                          );
-                        }),
-                      ),
-                  ],
+    return StreamBuilder<GameItemsState>(
+        initialData: Assemble.gameItemsLogic.state,
+        stream: Assemble.gameItemsLogic.stream,
+        builder: (context, snapshot) {
+          final state = snapshot.requireData;
+          print('TCard');
+
+          return TCard(
+            slideSpeed: 25,
+            delaySlideFor: 60,
+            controller: cardController,
+            size: Size.square(min(
+              constraints.biggest.width,
+              constraints.biggest.height / 2,
+            )),
+            cards: state.gameItems
+                .map((e) => CapitalCard(key: ValueKey(e), item: e))
+                .toList(),
+            onForward: (index, info) {
+              Assemble.game.onGuess(
+                index,
+                info.direction == SwipDirection.Right,
+              );
+            },
+          );
+        });
+  }
+}
+
+class _HeaderWidget extends StatelessWidget {
+  const _HeaderWidget({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<GameItemsState>(
+        initialData: Assemble.gameItemsLogic.state,
+        stream: Assemble.gameItemsLogic.stream,
+        builder: (context, snapshot) {
+          final state = snapshot.requireData;
+          print('Header');
+
+          return Headers(
+            title: 'Is it ${state.current.capital}?',
+            subtitle: state.current.country,
+          );
+        });
+  }
+}
+
+class _ProgressWidget extends StatelessWidget {
+  const _ProgressWidget({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<double>(
+        initialData: Assemble.gameItemsLogic.state.progress,
+        stream: Assemble.gameItemsLogic.stream
+            .map((state) => state.progress)
+            .distinct(),
+        builder: (context, snapshot) {
+          final progress = snapshot.requireData;
+          print('Progress1 = $progress');
+
+          return StreamBuilder<Color>(
+              initialData: Assemble.palette.colors.second,
+              stream: Assemble.palette.stream
+                  .map((state) => state.second)
+                  .distinct(),
+              builder: (context, snapshot) {
+                final color = snapshot.requireData;
+                print('Color = $color');
+
+                return ProgressWave(
+                    color: color.withOpacity(0.6),
+                    progress: progress,
+                    duration: const Duration(seconds: 15));
+              });
+        });
+  }
+}
+
+class _ScoreProgressWidget extends StatelessWidget {
+  const _ScoreProgressWidget({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<double>(
+      initialData: Assemble.game.state.progress,
+      stream: Assemble.game.stream.map((state) => state.progress).distinct(),
+      builder: (context, snapshot) {
+        final progress = snapshot.requireData;
+        print('Progress2 = $progress');
+
+        return StreamBuilder<ColorPair>(
+          initialData: Assemble.palette.colors,
+          stream: Assemble.palette.stream,
+          builder: (context, snapshot) {
+            final colors = snapshot.requireData;
+            print('ColorPair = $colors');
+
+            return ProgressWave(
+              color: colors.second.withOpacity(0.4),
+              progress: progress,
+              duration: const Duration(seconds: 15),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _ResultOrLoadingWidget extends StatelessWidget {
+  const _ResultOrLoadingWidget({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<GameItemsState>(
+      initialData: Assemble.gameItemsLogic.state,
+      stream: Assemble.gameItemsLogic.stream,
+      builder: (context, snapshot) {
+        final isCompleted = snapshot.requireData.isCompleted;
+        print('isComplete2 = $isCompleted');
+        return isCompleted
+            ? Positioned.fill(
+                child: CompletedWidget(
+                  score: Assemble.game.state.score,
+                  topScore: Assemble.game.state.topScore,
+                  onTap: () => Assemble.game.onReset(),
                 ),
-              ),
-      ),
+              )
+            : StreamBuilder<ColorPair>(
+                initialData: Assemble.palette.colors,
+                stream: Assemble.palette.stream,
+                builder: (context, snapshot) {
+                  final colors = snapshot.requireData;
+
+                  return Center(
+                    child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation(colors.second)),
+                  );
+                });
+      },
     );
   }
 }

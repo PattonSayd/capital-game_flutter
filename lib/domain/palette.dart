@@ -1,29 +1,23 @@
+import 'dart:async';
+
 import 'package:capitals_quiz/domain/models.dart';
 import 'package:flutter/material.dart';
 import 'package:palette_generator/palette_generator.dart';
 
-class PaletteLogic extends ChangeNotifier {
-  PaletteGenerator? _currentPalette;
-  PaletteGenerator? _nextPalette;
+class PaletteState {
+  final PaletteGenerator? currentPalette;
+  final PaletteGenerator? nextPalette;
+
+  const PaletteState({
+    this.currentPalette,
+    this.nextPalette,
+  });
 
   static const _defaultColor = Colors.grey;
 
-  ColorPair get colors => _currentPalette != null
-      ? _buildColors(_currentPalette)
+  ColorPair get colors => currentPalette != null
+      ? _buildColors(currentPalette)
       : const ColorPair(_defaultColor, _defaultColor);
-
-  Future<void> updatePalette(ImageProvider current, ImageProvider? next) async {
-    final crt = _currentPalette == null
-        ? await PaletteGenerator.fromImageProvider(current)
-        : _nextPalette;
-    final nxt =
-        next != null ? await PaletteGenerator.fromImageProvider(next) : null;
-
-    _setState(() {
-      _currentPalette = crt;
-      _nextPalette = nxt;
-    });
-  }
 
   ColorPair _buildColors(PaletteGenerator? palette) {
     Color? mainColor = palette?.mutedColor?.color;
@@ -34,8 +28,44 @@ class PaletteLogic extends ChangeNotifier {
     return ColorPair(mainColor, secondColor);
   }
 
-  void _setState(VoidCallback callback) {
-    callback();
-    notifyListeners();
+  PaletteState copyWith({
+    PaletteGenerator? currentPalette,
+    PaletteGenerator? nextPalette,
+  }) =>
+      PaletteState(
+        currentPalette: currentPalette ?? this.currentPalette,
+        nextPalette: nextPalette ?? this.nextPalette,
+      );
+}
+
+class PaletteLogic {
+  var _state = const PaletteState();
+
+  final _controller = StreamController<PaletteState>.broadcast();
+
+  Stream<ColorPair> get stream => _controller.stream.map((state) {
+        return state.colors;
+      });
+
+  ColorPair get colors => _state.colors;
+
+  Future<void> dispose() => _controller.close();
+
+  Future<void> updatePalette(ImageProvider current, ImageProvider? next) async {
+    final crt = _state.currentPalette == null
+        ? await PaletteGenerator.fromImageProvider(current)
+        : _state.nextPalette;
+    final nxt =
+        next != null ? await PaletteGenerator.fromImageProvider(next) : null;
+
+    _onUpdatePalette(crt, nxt);
+  }
+
+  _onUpdatePalette(PaletteGenerator? current, PaletteGenerator? next) =>
+      _setState(_state.copyWith(currentPalette: current, nextPalette: next));
+
+  void _setState(PaletteState state) {
+    _state = state;
+    _controller.add(_state);
   }
 }
