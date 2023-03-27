@@ -1,46 +1,10 @@
 import 'dart:math';
 
-import 'package:capitals_quiz/domain/models.dart';
+import 'package:capitals_quiz/domain/state/game_items_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class GameItemsState {
-  final int currentIndex;
-  final List<GameItems> gameItems;
-
-  const GameItemsState({
-    required this.currentIndex,
-    required this.gameItems,
-  });
-
-  static const empty = GameItemsState(currentIndex: 0, gameItems: []);
-
-  GameItems get current => gameItems[currentIndex];
-
-  GameItems? get next => ((currentIndex + 1) < gameItems.length)
-      ? gameItems[currentIndex + 1]
-      : null;
-
-  bool get isCompleted => currentIndex == gameItems.length;
-
-  bool get isCurrentTrue => current.fake == null;
-
-  int get originalLength =>
-      gameItems.where((element) => element.fake == null).length;
-
-  int get fakeLength => gameItems.length - originalLength;
-
-  double get progress => currentIndex / gameItems.length;
-
-  GameItemsState copyWith({
-    int? currentIndex,
-    List<GameItems>? gameItems,
-  }) {
-    return GameItemsState(
-      currentIndex: currentIndex ?? this.currentIndex,
-      gameItems: gameItems ?? this.gameItems,
-    );
-  }
-}
+import 'models/country.dart';
+import 'models/game_items.dart';
 
 class GameItemsLogic extends Cubit<GameItemsState> {
   final Random _random;

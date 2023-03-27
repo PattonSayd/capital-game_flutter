@@ -6,10 +6,12 @@ import 'package:provider/provider.dart';
 import 'package:tcard/tcard.dart';
 
 import 'package:capitals_quiz/domain/game.dart';
-import 'package:capitals_quiz/domain/game_items_logic.dart';
 
 import '../data/data.dart';
-import '../domain/models.dart';
+import '../domain/models/color_pair.dart';
+import '../domain/models/game_items.dart';
+import '../domain/state/game_items_state.dart';
+import '../domain/state/game_state.dart';
 import 'components.dart';
 
 class HomePage extends StatefulWidget {

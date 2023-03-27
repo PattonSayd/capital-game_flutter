@@ -1,14 +1,18 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:capitals_quiz/domain/models/game_items.dart';
+import 'package:capitals_quiz/domain/state/game_items_state.dart';
+import 'package:capitals_quiz/domain/state/game_state.dart';
 import 'package:capitals_quiz/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:capitals_quiz/data/data.dart';
 import 'package:capitals_quiz/domain/game_items_logic.dart';
-import 'package:capitals_quiz/domain/models.dart';
 import 'package:capitals_quiz/domain/palette.dart';
+
+import 'models/country.dart';
 
 abstract class GameEvent {
   const GameEvent();
@@ -29,35 +33,6 @@ class OnGuessGameEvent implements GameEvent {
     required this.index,
     required this.isTrue,
   });
-}
-
-class GameState {
-  final int score;
-  final int topScore;
-  final List<Country> countries;
-
-  const GameState({
-    required this.score,
-    required this.topScore,
-    required this.countries,
-  });
-
-  static const GameState empty =
-      GameState(score: 0, topScore: 1, countries: []);
-
-  double get progress => max(0, score) / topScore;
-
-  GameState copyWith({
-    int? score,
-    int? topScore,
-    List<Country>? countries,
-  }) {
-    return GameState(
-      score: score ?? this.score,
-      topScore: topScore ?? this.topScore,
-      countries: countries ?? this.countries,
-    );
-  }
 }
 
 class GameLogic extends Bloc<GameEvent, GameState> {
