@@ -1,14 +1,18 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:capitals_quiz/domain/models/game_items.dart';
+import 'package:capitals_quiz/domain/state/game_items_state.dart';
+import 'package:capitals_quiz/domain/state/game_state.dart';
 import 'package:capitals_quiz/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:capitals_quiz/data/data.dart';
 import 'package:capitals_quiz/domain/game_items_logic.dart';
-import 'package:capitals_quiz/domain/models.dart';
 import 'package:capitals_quiz/domain/palette.dart';
+
+import 'models/country.dart';
 
 abstract class GameEvent {
   const GameEvent();
@@ -31,35 +35,6 @@ class OnGuessGameEvent implements GameEvent {
   });
 }
 
-class GameState {
-  final int score;
-  final int topScore;
-  final List<Country> countries;
-
-  const GameState({
-    required this.score,
-    required this.topScore,
-    required this.countries,
-  });
-
-  static const GameState empty =
-      GameState(score: 0, topScore: 1, countries: []);
-
-  double get progress => max(0, score) / topScore;
-
-  GameState copyWith({
-    int? score,
-    int? topScore,
-    List<Country>? countries,
-  }) {
-    return GameState(
-      score: score ?? this.score,
-      topScore: topScore ?? this.topScore,
-      countries: countries ?? this.countries,
-    );
-  }
-}
-
 class GameLogic extends Bloc<GameEvent, GameState> {
   final Random _random;
   final Api _api;
@@ -76,9 +51,17 @@ class GameLogic extends Bloc<GameEvent, GameState> {
     this._gameItemsLogic, {
     this.countryLimit = GameLogic.defaultCountryLimit,
   }) : super(GameState.empty) {
-    on<OnStartGameEvent>(_onStartGame);
-    on<OnGuessGameEvent>(_onGuess);
-    on<OnResetGameEvent>(_onReset);
+    on<GameEvent>(_onGameEvent);
+  }
+
+  Future<void> _onGameEvent(GameEvent event, Emitter<GameState> emit) async {
+    if (event is OnStartGameEvent) {
+      await _onStartGame(event, emit);
+    } else if (event is OnGuessGameEvent) {
+      await _onGuess(event, emit);
+    } else if (event is OnResetGameEvent) {
+      _onReset(event, emit);
+    }
   }
 
   static const _successGuess = 3;

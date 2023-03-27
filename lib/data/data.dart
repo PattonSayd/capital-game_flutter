@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 
-import '../domain/models.dart';
+import '../domain/models/country.dart';
 
 class Api {
   const Api();
@@ -48,7 +48,7 @@ class AssetsJsonLoader implements JsonLoader {
 
   @override
   Future<Map<String, dynamic>> load() async {
-    final raw = await rootBundle.loadString('assets/assets.json');
+    final raw = await rootBundle.loadString('assets/pictures.json');
     return jsonDecode(raw) as Map<String, dynamic>;
   }
 }

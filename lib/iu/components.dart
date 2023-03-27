@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:wave/config.dart';
 import 'package:wave/wave.dart';
 
-import 'package:capitals_quiz/domain/models.dart';
+import '../domain/models/game_items.dart';
 
 class Headers extends StatelessWidget {
   final String? title;
