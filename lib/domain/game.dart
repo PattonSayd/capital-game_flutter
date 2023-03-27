@@ -51,9 +51,17 @@ class GameLogic extends Bloc<GameEvent, GameState> {
     this._gameItemsLogic, {
     this.countryLimit = GameLogic.defaultCountryLimit,
   }) : super(GameState.empty) {
-    on<OnStartGameEvent>(_onStartGame);
-    on<OnGuessGameEvent>(_onGuess);
-    on<OnResetGameEvent>(_onReset);
+    on<GameEvent>(_onGameEvent);
+  }
+
+  Future<void> _onGameEvent(GameEvent event, Emitter<GameState> emit) async {
+    if (event is OnStartGameEvent) {
+      await _onStartGame(event, emit);
+    } else if (event is OnGuessGameEvent) {
+      await _onGuess(event, emit);
+    } else if (event is OnResetGameEvent) {
+      _onReset(event, emit);
+    }
   }
 
   static const _successGuess = 3;
