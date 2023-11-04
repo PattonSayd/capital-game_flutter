@@ -3,9 +3,9 @@
 A new Flutter project.
 
 <div style="display: flex">
-<img src="./templates/capital1_ss.png" width="300">
-<img src="./templates/capital2_ss.png" width="300">
-<img src="./templates/capital3_ss.png" width="300">
+<img src="./templates/capital1_ss.png" width="250">
+<img src="./templates/capital2_ss.png" width="250">
+<img src="./templates/capital3_ss.png" width="250">
 </div>
 
 ## Getting Started
