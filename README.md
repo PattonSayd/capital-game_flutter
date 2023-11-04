@@ -2,6 +2,11 @@
 
 A new Flutter project.
 
+<img src="./templates/capital1_ss.png" width="50">
+<img src="./templates/capital2_ss.png" width="50">
+<img src="./templates/capital3_ss.png" width="50">
+
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
