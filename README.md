@@ -23,6 +23,8 @@ Tools used:
 
 ## Folder Structure
 
+The code of the app implements clean architecture to separate the UI, domain and data layers.
+
     lib
     ├── data
     │   ├── data
