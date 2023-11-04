@@ -1,6 +1,6 @@
-# capitals_quiz
+# Capitals Quiz
+A game that will test how well you know the capitals of the world!
 
-A new Flutter project.
 
 <div style="display: flex">
 <img src="./templates/capital1_ss.png" width="250">
@@ -8,15 +8,31 @@ A new Flutter project.
 <img src="./templates/capital3_ss.png" width="250">
 </div>
 
-## Getting Started
+## App Overview
 
-This project is a starting point for a Flutter application.
+Looking through the branches you can see several different implementations of state management;
 
-A few resources to get you started if this is your first Flutter project:
+Tools used:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+    - stream
+    - provider
+    - getit/injectable
+    - bloc
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Folder Structure
+
+    lib
+    ├── data
+    │   ├── data
+    ├── domain
+    │   ├── models
+    │   ├── state    
+    ├── ui
+    │   ├── app
+    │   ├── home
+    └── main.dart
+
+## Get started
+
+An easy way to get started. 
+Download and run
