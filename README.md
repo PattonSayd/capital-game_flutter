@@ -10,7 +10,9 @@ A game that will test how well you know the capitals of the world!
 
 ## App Overview
 
-Looking through the branches you can see several different implementations of state management;
+Looking through the branches you can see several different implementations of state management.
+The application has the ability to extract vibrant colors from an image for the user interface.
+Light and dark theme support.
 
 Tools used:
 
